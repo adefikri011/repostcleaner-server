@@ -35,6 +35,8 @@ mutations. Adding an item already in the queue is idempotent.
 
 Deleting a repost library item automatically removes its queue entry. Sample
 preview queue operations remain client-only and are not written to user data.
+Queue entries currently support list, add, remove, and clear only. Status and
+priority updates are not implemented and do not produce activity events.
 
 ## Activity history
 
@@ -52,6 +54,8 @@ Supported `type` values are `repost_created`, `repost_updated`,
 `repost_deleted`, `queue_item_added`, and `queue_item_removed`. Responses
 include `items`, `total`, `page`, `page_size`, and `total_pages`. Queue
 preview/sample interactions are not persisted.
+Queue status/priority activity types are not supported because the queue does
+not yet expose those operations.
 
 ## User settings
 
