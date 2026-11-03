@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, DateTime, String, func
+from sqlalchemy import Boolean, DateTime, String, false, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
@@ -16,6 +16,9 @@ class User(Base):
         String(320), unique=True, index=True, nullable=False
     )
     display_name: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    compact_library_grid: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
@@ -29,5 +32,8 @@ class User(Base):
     )
 
     sessions: Mapped[list["UserSession"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    repost_items: Mapped[list["RepostItem"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )

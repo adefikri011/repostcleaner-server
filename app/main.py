@@ -5,6 +5,10 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.v1.auth import router as auth_router
+from app.api.v1.activities import router as activities_router
+from app.api.v1.queue import router as queue_router
+from app.api.v1.reposts import router as reposts_router
+from app.api.v1.users import router as users_router
 from app.core.config import get_settings
 from app.schemas.auth import ApiResponse
 
@@ -20,7 +24,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.frontend_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "X-CSRF-Token", "X-Repost-Request"],
 )
 
@@ -59,6 +63,10 @@ async def handle_validation_error(
 
 
 app.include_router(auth_router, prefix="/api/v1")
+app.include_router(activities_router, prefix="/api/v1")
+app.include_router(queue_router, prefix="/api/v1")
+app.include_router(reposts_router, prefix="/api/v1")
+app.include_router(users_router, prefix="/api/v1")
 
 
 @app.get("/")

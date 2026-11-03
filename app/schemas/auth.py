@@ -1,9 +1,24 @@
+from datetime import datetime
 from typing import Generic, TypeVar
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 T = TypeVar("T")
+
+
+def validate_password_strength(value: str) -> str:
+    categories = (
+        any(character.islower() for character in value),
+        any(character.isupper() for character in value),
+        any(character.isdigit() for character in value),
+        any(not character.isalnum() for character in value),
+    )
+    if len(value) < 12 or sum(categories) < 3:
+        raise ValueError(
+            "Use at least 12 characters and three character types"
+        )
+    return value
 
 
 class ApiResponse(BaseModel, Generic[T]):
@@ -18,6 +33,7 @@ class UserResponse(BaseModel):
     id: UUID
     email: EmailStr
     display_name: str | None
+    created_at: datetime
 
 
 class AuthData(BaseModel):
@@ -38,17 +54,7 @@ class RegisterRequest(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password_strength(cls, value: str) -> str:
-        categories = (
-            any(character.islower() for character in value),
-            any(character.isupper() for character in value),
-            any(character.isdigit() for character in value),
-            any(not character.isalnum() for character in value),
-        )
-        if sum(categories) < 3:
-            raise ValueError(
-                "Use at least three of lowercase, uppercase, number, and symbol"
-            )
-        return value
+        return validate_password_strength(value)
 
     @field_validator("display_name")
     @classmethod

@@ -4,6 +4,7 @@ from collections.abc import Generator
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
+from sqlalchemy import event
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
@@ -27,6 +28,14 @@ def client() -> Generator[tuple[TestClient, object], None, None]:
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
+    if engine.dialect.name == "sqlite":
+        @event.listens_for(engine, "connect")
+        def enable_sqlite_foreign_keys(dbapi_connection, connection_record) -> None:
+            del connection_record
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
+
     Base.metadata.create_all(engine)
 
     def override_get_db() -> Generator[Session, None, None]:
